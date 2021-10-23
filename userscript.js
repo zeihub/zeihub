@@ -3,9 +3,8 @@
 // @namespace    http://tampermonkey.net/
 // @version      0.1
 // @description  unpaywall all the things
-// @author       @aiuzdahjkfeqjd
+// @author       @zeihub
 // @match        *://*/*
-// @icon         https://www.google.com/s2/favicons?domain=zeit.de
 // @grant        GM.xmlHttpRequest
 // @require      https://cdn.jsdelivr.net/npm/@mozilla/readability@0.4.1/Readability.min.js
 // @require      https://cdn.jsdelivr.net/npm/dompurify@2.3.3/dist/purify.min.js
