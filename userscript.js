@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         Zeihub
-// @namespace    http://tampermonkey.net/
-// @version      0.1
-// @description  unpaywall all the things
+// @namespace    https://github.com/zeihub/zeihub/
+// @version      0.2
+// @description  share all the things
 // @author       @zeihub
 // @match        *://*/*
+// @icon         
 // @grant        GM.xmlHttpRequest
 // @require      https://cdn.jsdelivr.net/npm/@mozilla/readability@0.4.1/Readability.min.js
 // @require      https://cdn.jsdelivr.net/npm/dompurify@2.3.3/dist/purify.min.js
@@ -40,13 +41,15 @@ const handleConfig = {
     }
 }
 
-const PASSPHRASE = 'this is totally insecure but nobody cares.'
 const PASTEHOST = handleConfig.read('pasteHost') || 'cryptobin'
 const EXPIRY = handleConfig.read('expiry') || '1week'
 
 function cryptArticleContent (articleContent, password) {
-    const passPhrase = typeof(password) !== 'undefined' ? password : PASSPHRASE
-    return CryptoJS.AES.encrypt(articleContent, passPhrase).toString()
+    const passPhrase = typeof(password) !== 'undefined' ? password : generatePassphrase()
+    return {
+        cryptedContent: CryptoJS.AES.encrypt(articleContent, passPhrase).toString(),
+        passPhrase: passPhrase
+    }
 }
 
 function createButton(innerText, id, additionalTop = 0) {
@@ -67,10 +70,9 @@ function createButton(innerText, id, additionalTop = 0) {
     return button
 }
 
-
-function decryptArticleContent (cryptedContent) {
+function decryptArticleContent (cryptedContent, passPhrase) {
     try {
-        const decrypted = CryptoJS.AES.decrypt(cryptedContent, PASSPHRASE)
+        const decrypted = CryptoJS.AES.decrypt(cryptedContent, passPhrase)
         return decrypted.toString(CryptoJS.enc.Utf8)
     } catch (error) {
         const customPassPhrase = window.prompt('please enter the password for this content')
@@ -83,9 +85,9 @@ function createShareButton () {
     const button = createButton('Zeihub', 'zeihub')
     button.addEventListener('click', async function () {
         const articleContent = getArticleContent()
-        const cryptedArticle = cryptArticleContent(articleContent)
-        const response = await sendToBin(cryptedArticle)
-        window.alert(response.url)
+        const { cryptedContent, passPhrase } = cryptArticleContent(articleContent)
+        const response = await sendToBin(cryptedContent)
+        window.alert(`${response.url}#${passPhrase}`)
     })
 }
 
@@ -94,8 +96,8 @@ function createCustomPasswordShareButton () {
     button.addEventListener('click', async function () {
         const articleContent = getArticleContent()
         const password = window.prompt('enter your custom password')
-        const cryptedArticle = cryptArticleContent(articleContent, password)
-        const response = await sendToBin(cryptedArticle)
+        const { cryptedContent, passPhrase } = cryptArticleContent(articleContent, password)
+        const response = await sendToBin(cryptedContent)
         window.alert(response.url)
     })
 }
@@ -105,7 +107,8 @@ function createDecryptButton () {
     const button = createButton('Unzei', 'unzei')
     button.addEventListener('click', async function () {
         const cryptedContent = getCryptedContent()
-        const decryptedArticle = decryptArticleContent(cryptedContent)
+        const passPhrase = getPassPhraseFromUrl()
+        const decryptedArticle = decryptArticleContent(cryptedContent, passPhrase)
         document.body.querySelector('#content-view .container').innerHTML = decryptedArticle
     })
 }
@@ -122,8 +125,6 @@ function getCryptedContent () {
     return atob(document.querySelector(pasteHosts[PASTEHOST].pasteWrapper).value)
 }
 
-
-
 async function sendToBin (content) {
     // TODO make the body and headers configurable for various pastebins
     const { host, path } = pasteHosts[PASTEHOST]
@@ -139,6 +140,15 @@ async function sendToBin (content) {
     return result
 }
 
+function generatePassphrase() {
+    const pw1 = Math.random().toString(32).slice(2)
+    const pw2 = Math.random().toString(32).slice(2)
+    return `${pw1}${pw2}`
+}
+
+function getPassPhraseFromUrl () {
+    return window.location.hash.replace('#', '') || 'this is totally insecure but nobody cares.'
+}
 
 (function() {
     'use strict';
@@ -148,4 +158,4 @@ async function sendToBin (content) {
         createShareButton()
         createCustomPasswordShareButton()
     }
-})();
+})()
