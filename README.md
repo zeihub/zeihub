@@ -29,9 +29,15 @@ As a sender: Use the ZEIHUB button for the default password and use the other bu
 
 As a receiver: The content should be decrypted automatically if you click the UNZEI button and ask for a password otherwise.
 
+New feature: https://unzei.glitch.me/ as a standalone viewer/decrypter so that the recipient doesn't need the browser plugin.
+
+## unzei.glitch.me
+
+Visit https://unzei.glitch.me/ and enter the url or share the link like so: https://unzei.glitch.me/?zeiUrl=https://cryptobin.co/a5a292o4#pa4gvl3t0d6ipsc5aa3q8 for automatic input and decrypting. If nothing happens when the button is clicked, something is wrong with the paste (expired, non-existing, unusable URL, something like that).
+
 # Technical information
 
-Html from the source is chased through https://github.com/mozilla/readability and https://github.com/cure53/DOMPurify, then encrypted in the script with the default password or the given custom password, base64 encoded and loaded to the pastebin (currently https://cryptobin.co/)
+Html from the source is chased through https://github.com/mozilla/readability and https://github.com/cure53/DOMPurify, then encrypted in the script with the default password or the given custom password, base64 encoded and loaded to the pastebin (currently https://cryptobin.co/). The userscript uploads the texts with a pasteExpiry of 1 week by default. Will be configurable in the future.
 
 # Roadmap
 
