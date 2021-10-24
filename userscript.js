@@ -42,7 +42,7 @@ const handleConfig = {
 }
 
 const PASTEHOST = handleConfig.read('pasteHost') || 'cryptobin'
-const EXPIRY = handleConfig.read('expiry') || '1week'
+const EXPIRY = handleConfig.read('expiry') || 'week'
 
 function cryptArticleContent (articleContent, password) {
     const passPhrase = typeof(password) !== 'undefined' ? password : generatePassphrase()
